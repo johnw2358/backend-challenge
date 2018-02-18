@@ -2,7 +2,6 @@
 Match customer pickup requests with non-profit recipients
 
 Setup instructions:
-
 `pip install -r requirements.txt`
 `source copia-env/bin/activate`
 
