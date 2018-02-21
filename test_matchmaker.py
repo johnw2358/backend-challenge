@@ -12,22 +12,19 @@ from class_module import Pickup, Recipient
 from matchmaker import *
 
 class TestStringMethods(unittest.TestCase):
-#    def setUp(self):
-#       with open("test_pickups.csv", "w") as f:
-#           writer = csv.writer(f)
+    def setUp(self): 
+        try: 
+            self.test_pickups = load_pickups("test_pickups.csv")
+            self.test_recipients = load_recipients("test_recipients.csv")
+            self.test_daily_pickups = group_pickups(self.test_pickups)
+            assign_matches(self.test_daily_pickups, self.test_recipients)
 
-#writer.writerow(["Date", "temperature 1", "Temperature 2"])
-        
-#        test_pickups = open("test_pickups.csv", "w")
-#        test_pickups.writerow("FirstName,LastName,Street,City,State,Postal,Country,Email,Phone,Latitude,Longitude,Categories,PickupAt,TimeZoneId")
-#        test_pickups.write("Brett,Sullivan,2784 Ella Street,San Francisco,CA,94107,US,BrettJSullivan@teleworm.us,650-262-4366,37.728912,-122.324225,45,2016-11-29T16:00:00-08:00,America/Los_Angeles")
-#        test_pickups.close()
-#self.addCleanup(os.remove, "test_pickups.csv")
+        except:
+            raise Exception("Error loading test data")
 
     def test_load_pickups(self):
         try:
             pickups = load_pickups("Pickups.csv")
-            self.pickups = pickups
         except:
             raise Exception("Error loading pickups csv file")
 
@@ -83,7 +80,6 @@ class TestStringMethods(unittest.TestCase):
     def test_load_recipients(self):
         try:
             recipients = load_recipients("Recipients.csv")
-            self.recipients = recipients
         except:
             raise Exception("Error loading recipients csv file")
 
@@ -136,28 +132,48 @@ class TestStringMethods(unittest.TestCase):
                 self.assertEqual(type(recipient.Schedule[weekday]), int)
                 self.assertTrue(0 <= recipient.Schedule[weekday] <= pow(2, 16))
 
-#    def test_group_pickups(self):
-#        try:
-#            daily_pickups = group_pickups(self.pickups)
-#            print("skip")
-#        except:
-#            raise Exception("Error grouping pickups")
+    def test_group_pickups(self):
+        try:
+            daily_pickups = group_pickups(self.test_pickups)
+        except:
+            raise Exception("Error grouping pickups")
 
-#  for date, pickups in sorted(daily_pickups.items()):
-#           self.assertGreater(len(pickups), 0)
+        for date, pickups in sorted(daily_pickups.items()):
+            self.assertGreater(len(pickups), 0)
 
     def test_calculate_distance(self):
         try:
-            pickups = load_pickups("Pickups.csv")
-            recipients = load_recipients("Recipients.csv")
-
-            for pickup in pickups:
-                for recipient in recipients:
-                    pickup_coordinates = (pickup.Latitude, pickup.Longitude)
-                    recipient_coordinates = (recipient.Latitude, recipient.Longitude)
-                    distance = vincenty(pickup_coordinates, recipient_coordinates).miles
+            for pickup in self.test_pickups:
+                for recipient in self.test_recipients:
+                    distance = calculate_distance(pickup, recipient)
+                    self.assertGreater(distance, 0)
         except:
             raise Exception("Error calculating distance")
+
+    def test_find_matches(self):
+        for pickup in self.test_pickups:
+            matches = find_matches(pickup, self.test_recipients)
+            
+            for match, distance in matches:
+                self.assertEqual(type(match), Recipient)
+                self.assertLess(distance, 5.0)
+                self.assertEqual(pickup.Categories & match.Restrictions, 0)
+                self.assertTrue(match.is_open(pickup.PickupAt))
+
+    def test_write_results(self):
+        write_results("test_matches.csv", self.test_daily_pickups)
+        self.assertTrue(os.path.isfile("./test_matches.csv"))
+        os.remove("./test_matches.csv")
+        
+    def test_assign_matches(self):
+        assign_matches(self.test_daily_pickups, self.test_recipients)
+        
+        for pickup in self.test_pickups:
+            for match, distance in pickup.Matches:
+                self.assertEquals(type(match), Recipient)
+                self.assertLess(distance, 5.0)
+                self.assertEqual(pickup.Categories & match.Restrictions, 0)
+                self.assertTrue(match.is_open(pickup.PickupAt))
 
 def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(TestStringMethods)

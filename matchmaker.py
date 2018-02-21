@@ -128,6 +128,7 @@ def assign_matches(daily_pickups, recipients):
 
             if len(matches) > 0:
                 pickup.Matches = matches
+
 def main():
     # Read and verify arguments
     arguments = get_arguments()
