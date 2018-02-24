@@ -11,11 +11,19 @@ from email.utils import parseaddr
 from class_module import Pickup, Recipient
 from matchmaker import *
 
-class TestStringMethods(unittest.TestCase):
-    def setUp(self): 
+class TestMethods(unittest.TestCase):
+    AlreadySetup = False
+    Arguments = []
+
+    def setUp(self):
+        if not self.__class__.AlreadySetup:
+            self.__class__.AlreadySetup = True
+            self.__class__.Arguments = get_arguments()
+            verify_arguments(self.Arguments)
+
         try: 
-            self.test_pickups = load_pickups("test_pickups.csv")
-            self.test_recipients = load_recipients("test_recipients.csv")
+            self.test_pickups = load_pickups(self.Arguments.pickups)
+            self.test_recipients = load_recipients(self.Arguments.recipients)
             self.test_daily_pickups = group_pickups(self.test_pickups)
             assign_matches(self.test_daily_pickups, self.test_recipients)
 
@@ -23,12 +31,7 @@ class TestStringMethods(unittest.TestCase):
             raise Exception("Error loading test data")
 
     def test_load_pickups(self):
-        try:
-            pickups = load_pickups("Pickups.csv")
-        except:
-            raise Exception("Error loading pickups csv file")
-
-        for pickup in pickups:
+        for pickup in self.test_pickups:
             self.assertEquals(type(pickup.FirstName), str)
             self.assertEquals(len(pickup.FirstName.split(" ")), 1)
             
@@ -78,12 +81,7 @@ class TestStringMethods(unittest.TestCase):
             self.assertTrue(pickup.TimeZoneId in pytz.all_timezones)
 
     def test_load_recipients(self):
-        try:
-            recipients = load_recipients("Recipients.csv")
-        except:
-            raise Exception("Error loading recipients csv file")
-
-        for recipient in recipients:
+        for recipient in self.test_recipients:
             self.assertEquals(type(recipient.FirstName), str)
             self.assertEquals(len(recipient.FirstName.split(" ")), 1)
 
@@ -133,23 +131,15 @@ class TestStringMethods(unittest.TestCase):
                 self.assertTrue(0 <= recipient.Schedule[weekday] <= pow(2, 16))
 
     def test_group_pickups(self):
-        try:
-            daily_pickups = group_pickups(self.test_pickups)
-        except:
-            raise Exception("Error grouping pickups")
-
-        for date, pickups in sorted(daily_pickups.items()):
+        for date, pickups in sorted(self.test_daily_pickups.items()):
             self.assertGreater(len(pickups), 0)
 
     def test_calculate_distance(self):
-        try:
-            for pickup in self.test_pickups:
-                for recipient in self.test_recipients:
-                    distance = calculate_distance(pickup, recipient)
-                    self.assertGreater(distance, 0)
-        except:
-            raise Exception("Error calculating distance")
-
+        for pickup in self.test_pickups:
+            for recipient in self.test_recipients:
+                distance = calculate_distance(pickup, recipient)
+                self.assertGreater(distance, 0)
+       
     def test_find_matches(self):
         for pickup in self.test_pickups:
             matches = find_matches(pickup, self.test_recipients)
@@ -161,9 +151,9 @@ class TestStringMethods(unittest.TestCase):
                 self.assertTrue(match.is_open(pickup.PickupAt))
 
     def test_write_results(self):
-        write_results("test_matches.csv", self.test_daily_pickups)
-        self.assertTrue(os.path.isfile("./test_matches.csv"))
-        os.remove("./test_matches.csv")
+        write_results(self.Arguments.matches, self.test_daily_pickups)
+        self.assertTrue(os.path.isfile("./" + self.Arguments.matches))
+        #os.remove("./" + self.arguments.matches)
         
     def test_assign_matches(self):
         assign_matches(self.test_daily_pickups, self.test_recipients)
@@ -176,7 +166,7 @@ class TestStringMethods(unittest.TestCase):
                 self.assertTrue(match.is_open(pickup.PickupAt))
 
 def main():
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestStringMethods)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestMethods)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 if __name__ == '__main__':
