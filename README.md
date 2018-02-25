@@ -4,18 +4,18 @@ Setup instructions:
 <br />2) `source copia-env/bin/activate`
 
 Usage:
-<br />Match pickups and recipients)`python matchmaker.py --pickups [Pickups.csv] --recipients [Recipients.csv] --matches [Matches.csv]`
-<br />Test matching procedure)`python test_matchmaker.py --pickups [test_pickups.csv] --recipients [test_recipients.csv] --matches [test_matches.csv]`
+<br />Main)`python matchmaker.py --pickups [Pickups.csv] --recipients [Recipients.csv] --matches [Matches.csv]`
+<br />Test)`python test_matchmaker.py --pickups [test_pickups.csv] --recipients [test_recipients.csv] --matches [test_matches.csv]`
 
 Formatting:
 <br />My solution, matchmaker.py, parses the csv files specified by the parameters and then matches all the eligible recipients for each pickup. Each row of the resulting matches csv is formatted as follows:
 <br /> `date,pickup name,[recipient name,recipient distace]...`
 
 For example, the output row corresponding to the pickup for Tommy Thompson on 2016-11-01 is
-<br /> `2016-11-01,Tommy Thompson,David Austin,4.18`,
+<br /> `2016-11-01,Tommy Thompson,David Austin,4.18`
 
 meaning that David Austin is Tommy's only available recipient, and he is 4.18 miles away. Pickups with no eligible recipients will appear as
-<br />`2016-11-09,Lillian Splawn,None`,
+<br />`2016-11-09,Lillian Splawn,None`
 
 and multiple eligible recipients will be sorted by distance, for example
 <br />`2016-11-01,Stephen Schwartz,Richard Berkey,1.45,Ricky Harris,3.49,Basil Mendez,4.71`
