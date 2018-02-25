@@ -4,8 +4,8 @@ Setup instructions:
 <br />2) `source copia-env/bin/activate`
 
 Usage:
-<br />Main)`python matchmaker.py --pickups [Pickups.csv] --recipients [Recipients.csv] --matches [Matches.csv]`
-<br />Test)`python test_matchmaker.py --pickups [test_pickups.csv] --recipients [test_recipients.csv] --matches [test_matches.csv]`
+<br />Main)`python matchmaker.py --pickups Pickups.csv --recipients Recipients.csv --matches Matches.csv`
+<br />Test)`python test_matchmaker.py --pickups test_pickups.csv --recipients test_recipients.csv --matches test_matches.csv`
 
 Formatting:
 <br />My solution, matchmaker.py, parses the csv files specified by the parameters and then matches all the eligible recipients for each pickup. Each row of the resulting matches csv is formatted as follows:
